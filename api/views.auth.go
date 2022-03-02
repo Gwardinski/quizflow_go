@@ -13,6 +13,8 @@ import (
 type RegisterPayload struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	// Manually passing in pre-hashed password for local testing
+	// TODO: add salt & hash, or go for oauth only approach
 	Password string `json:"password"`
 }
 
@@ -33,6 +35,7 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 	var user User
 	user.Username = payload.Username
 	user.Email = payload.Email
+	// TODO: Storing plain text passwords in DB is highly secure and always encouraged ✅
 	user.PasswordHash = payload.Password
 	user.DateCreated = time.Now()
 	user.DateUpdated = time.Now()
