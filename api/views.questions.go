@@ -198,7 +198,7 @@ func (app *application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write updated Question to DB
-	err = app.db.UpdateQuestion(question, payload)
+	err = app.db.UpdateQuestion(question.ID, payload)
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return

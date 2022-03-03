@@ -64,9 +64,20 @@ func (*TagsResponse) serialise(rows *sql.Rows) (TagsResponse, error) {
 		if err != nil {
 			return tags, err
 		}
-		tags = append(tags, "awd")
+		tags = append(tags, TagResponse(qt.Tag.Title))
 	}
 	return TagsResponse(tags), nil
+}
+
+func (t *Tag) serialise(row *sql.Row) error {
+	err := row.Scan(
+		&t.ID,
+		&t.Title,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *UserOnItem) serialise(row *sql.Row) (err error) {

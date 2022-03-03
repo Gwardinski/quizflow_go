@@ -17,7 +17,7 @@ func createJWT(UID int, secret string) (token []byte, err error) {
 	claims.Subject = fmt.Sprint(UID)
 	claims.Issued = jwt.NewNumericTime(time.Now())
 	claims.NotBefore = jwt.NewNumericTime(time.Now())
-	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(72 * time.Hour))
 	claims.Issuer = "domain.com"
 	claims.Audiences = []string{"domain.com"}
 	return claims.HMACSign(jwt.HS256, []byte(secret))

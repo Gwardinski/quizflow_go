@@ -13,7 +13,7 @@ func (m *DBModel) GetQuestion(id int) (QuestionDetailsRes, error) {
 
 	// GET SINGLE QUESTION
 	var question QuestionDetailsRes
-	row := m.DB.QueryRowContext(ctx, question.selectQuery(), id)
+	row := m.DB.QueryRowContext(ctx, QUESTION_SELECT_QUERY, id)
 	err := question.serialise(row)
 	if err != nil {
 		return question, err
@@ -21,7 +21,7 @@ func (m *DBModel) GetQuestion(id int) (QuestionDetailsRes, error) {
 
 	// GET SINGLE USER
 	var user UserOnItem
-	row = m.DB.QueryRowContext(ctx, user.selectQuery(), question.User.ID)
+	row = m.DB.QueryRowContext(ctx, USER_SELECT_QUERY, question.User.ID)
 	err = user.serialise(row)
 	if err != nil {
 		return question, err
@@ -29,7 +29,7 @@ func (m *DBModel) GetQuestion(id int) (QuestionDetailsRes, error) {
 
 	// GET MULTIPLE TAGS
 	var tags TagsResponse
-	rows, err := m.DB.QueryContext(ctx, tags.selectQuery(), id)
+	rows, err := m.DB.QueryContext(ctx, TAG_FROM_QUESTION_TAG_QUERY, id)
 	if err != nil {
 		return question, err
 	}
@@ -104,7 +104,7 @@ func (m *DBModel) CreateQuestion(question QuestionPayload, uid int) (int, error)
 		return 0, err
 	}
 	// Create Question
-	row := m.DB.QueryRowContext(ctx, question.insertQuery(),
+	row := m.DB.QueryRowContext(ctx, QUESTION_INSERT_QUERY,
 		question.Title,
 		question.Answer,
 		points,
@@ -114,33 +114,31 @@ func (m *DBModel) CreateQuestion(question QuestionPayload, uid int) (int, error)
 		uid,
 	)
 	// Get ID from new Question
-	var newId int
+	var questionID int
 	fmt.Println(row.Scan(
-		&newId,
+		&questionID,
 	))
 
-	// Save Tags
-	createOrUpdateTags(m, ctx, question.Tags)
+	updateQuestionTags(m, ctx, question.Tags, questionID)
 
-	return newId, nil
+	return questionID, nil
 }
 
-func (m *DBModel) UpdateQuestion(question QuestionDetailsRes, payload QuestionPayload) error {
+func (m *DBModel) UpdateQuestion(questionID int, payload QuestionPayload) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	// Update Question with values from Payload
-	question.updateFromPayload(payload)
-	_, err := m.DB.ExecContext(ctx, question.insertQuery(),
-		question.Title,
-		question.Answer,
-		question.Points,
-		question.Category,
-		question.DateUpdated,
-		question.ID,
+	_, err := m.DB.ExecContext(ctx, QUESTION_UPDATE_QUERY,
+		payload.Title,
+		payload.Answer,
+		payload.Points,
+		payload.Category,
+		time.Now(),
+		questionID,
 	)
 
-	//TODO: Create / Update Tags
+	updateQuestionTags(m, ctx, payload.Tags, questionID)
 
 	if err != nil {
 		return err
@@ -153,25 +151,45 @@ func (m *DBModel) DeleteQuestion(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := "delete from questions where id = $1"
-	_, err := m.DB.ExecContext(ctx, stmt, id)
+	_, err := m.DB.ExecContext(ctx, QUESTION_DELETE_QUERY, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func createOrUpdateTags(m *DBModel, ctx context.Context, questionTags []string) {
-	for _, t := range questionTags {
-		tr := TagResponse(t)
-		row := m.DB.QueryRowContext(ctx, tr.selectQuery(), t)
-		if row != nil {
-			// tag already exists
-			// check QuestionsTags
-			// if nil == true, create new entry in QuestionsTags
-		} else {
-			// create new entry in Tags
-			// create new entry in QuestionsTags
+func updateQuestionTags(m *DBModel, ctx context.Context, tags []string, questionID int) {
+	m.DB.ExecContext(ctx, QUESTION_TAG_DELETE_ALL_QUERY, questionID)
+	// TODO: error handling
+	for _, t := range tags {
+		// Find if Tag already exists
+		row := m.DB.QueryRowContext(ctx, TAG_SELECT_QUERY, t)
+		var tag Tag
+		tag.serialise(row)
+		if tag.Title == "" {
+			// Tag is new, create new Tag
+			r := m.DB.QueryRowContext(
+				ctx,
+				TAG_INSERT_QUERY,
+				t,
+			)
+			r.Scan(
+				&tag.ID,
+			)
 		}
+		createQuestionTag(m, ctx, questionID, tag.ID)
+	}
+}
+
+func createQuestionTag(m *DBModel, ctx context.Context, questionID int, tagID int) {
+	_, err := m.DB.ExecContext(
+		ctx,
+		QUESTION_TAG_INSERT_QUERY,
+		questionID,
+		tagID,
+	)
+	if err != nil {
+		// TODO: not sure what to do with this error yet
+		fmt.Println(err)
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strconv"
 	"time"
 )
 
@@ -61,22 +60,6 @@ type QuestionDetailsRes struct {
 	Tags          []TagResponse `json:"tags"`
 	User          UserOnItem    `json:"user"`
 	Rounds        []string      `json:"rounds"`
-}
-
-func (q *QuestionDetailsRes) updateFromPayload(p QuestionPayload) {
-	if p.Title != "" {
-		q.Title = p.Title
-	}
-	if p.Answer != "" {
-		q.Answer = p.Answer
-	}
-	if p.Points != "" {
-		q.Points, _ = strconv.Atoi(p.Points)
-	}
-	if p.Category != "" {
-		q.Category = p.Category
-	}
-	q.DateUpdated = time.Now()
 }
 
 // 'Lite' response object for queries on multiple items
