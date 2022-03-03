@@ -59,7 +59,6 @@ type QuestionDetailsRes struct {
 	DatePublished time.Time    `json:"datePublished"`
 	Tags          TagsResponse `json:"tags"`
 	User          UserOnItem   `json:"user"`
-	Rounds        []string     `json:"rounds"`
 }
 
 // 'Lite' response object for queries on multiple items

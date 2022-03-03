@@ -79,11 +79,3 @@ func (t *Tag) serialise(row *sql.Row) error {
 	}
 	return nil
 }
-
-func (u *UserOnItem) serialise(row *sql.Row) (err error) {
-	row.Scan(
-		&u.ID,
-		&u.Username,
-	)
-	return nil
-}

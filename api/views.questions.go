@@ -25,7 +25,6 @@ func (app *application) getPublishedQuestions(w http.ResponseWriter, r *http.Req
 	}
 
 	// Write Data
-	// Write Data
 	app.writeResponse(w, http.StatusOK, questions)
 }
 
@@ -35,6 +34,43 @@ func (app *application) getPublishedQuestions(w http.ResponseWriter, r *http.Req
 	Requires Bearer Token
 	= = = = = = = = = = = = = = = = = =
 */
+
+func (app *application) getQuestion(w http.ResponseWriter, r *http.Request) {
+	// Get UserID from JWT (to confirm ownership)
+	uidToken, err := app.getUserIdFromJWT(r)
+	if err != nil {
+		app.writeError(w, err, http.StatusUnauthorized)
+		return
+	}
+
+	// Get Question ID from params
+	vars := mux.Vars(r)
+	qidParam, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		app.writeError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	// Get Question
+	question, err := app.db.GetQuestion(qidParam)
+	if err != nil || question.ID == 0 {
+		app.writeError(w, err, http.StatusNotFound)
+		return
+	}
+
+	// AUTH CHECK: Check question belongs to user (if not published)
+	if !question.IsPublished && (question.User.ID != uidToken) {
+		app.writeError(
+			w,
+			errors.New("not published / No Auth"),
+			http.StatusUnauthorized,
+		)
+		return
+	}
+
+	// Write Data
+	app.writeResponse(w, http.StatusOK, question)
+}
 
 func (app *application) getUsersQuestions(w http.ResponseWriter, r *http.Request) {
 	// Get UserID from JWT (to get users questions)
@@ -84,43 +120,6 @@ func (app *application) getQuestionsByUser(w http.ResponseWriter, r *http.Reques
 
 func (app *application) getQuestionsRounds(w http.ResponseWriter, r *http.Request) {
 
-}
-
-func (app *application) getQuestion(w http.ResponseWriter, r *http.Request) {
-	// Get UserID from JWT (to confirm ownership)
-	uidToken, err := app.getUserIdFromJWT(r)
-	if err != nil {
-		app.writeError(w, err, http.StatusUnauthorized)
-		return
-	}
-
-	// Get Question ID from params
-	vars := mux.Vars(r)
-	qidParam, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		app.writeError(w, err, http.StatusBadRequest)
-		return
-	}
-
-	// Get Question
-	question, err := app.db.GetQuestion(qidParam)
-	if err != nil || question.ID == 0 {
-		app.writeError(w, err, http.StatusNotFound)
-		return
-	}
-
-	// AUTH CHECK: Check question belongs to user (if not published)
-	if !question.IsPublished && (question.User.ID != uidToken) {
-		app.writeError(
-			w,
-			errors.New("not published / No Auth"),
-			http.StatusUnauthorized,
-		)
-		return
-	}
-
-	// Write Data
-	app.writeResponse(w, http.StatusOK, question)
 }
 
 func (app *application) createQuestion(w http.ResponseWriter, r *http.Request) {

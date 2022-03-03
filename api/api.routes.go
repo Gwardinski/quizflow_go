@@ -14,9 +14,9 @@ func (app *application) routes() http.Handler {
 	statusRoute.HandleFunc("/", app.getAppStatus).Methods("GET")
 
 	// Auth routes
-	authRoute := router.PathPrefix("/auth").Subrouter()
-	authRoute.HandleFunc("/login", app.login).Methods("Post")
-	authRoute.HandleFunc("/register", app.register).Methods("Post")
+	authRoutes := router.PathPrefix("/auth").Subrouter()
+	authRoutes.HandleFunc("/login", app.login).Methods("Post")
+	authRoutes.HandleFunc("/register", app.register).Methods("Post")
 
 	// Question routes
 	questionsRoute := router.PathPrefix("/questions").Subrouter()
@@ -29,7 +29,16 @@ func (app *application) routes() http.Handler {
 	questionsRoute.HandleFunc("/{id}/rounds", app.getQuestionsRounds).Methods("GET")
 	questionsRoute.HandleFunc("/user/{id}", app.getQuestionsByUser).Methods("GET")
 
-	// TODO: Round routes
+	// Round routes
+	roundsRoute := router.PathPrefix("/rounds").Subrouter()
+	roundsRoute.HandleFunc("/", app.getPublishedRounds).Methods("GET")
+	// roundsRoute.HandleFunc("/user", app.getUsersRounds).Methods("GET")
+	// roundsRoute.HandleFunc("/", app.createRound).Methods("POST")
+	roundsRoute.HandleFunc("/{id}", app.getRound).Methods("GET")
+	// roundsRoute.HandleFunc("/{id}", app.updateRound).Methods("PUT")
+	// roundsRoute.HandleFunc("/{id}", app.deleteRound).Methods("DELETE")
+	// roundsRoute.HandleFunc("/{id}/rounds", app.getRoundsRounds).Methods("GET")
+	// roundsRoute.HandleFunc("/user/{id}", app.getRoundsByUser).Methods("GET")
 
 	// TODO: Quiz routes
 
