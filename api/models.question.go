@@ -48,18 +48,18 @@ type QuestionPayload struct {
 // /questions/{:id}
 // Multiple Look ups made in controller to get Tag strings and User struct from DB
 type QuestionDetailsRes struct {
-	ID            int           `json:"id"`
-	Title         string        `json:"title"`
-	Answer        string        `json:"answer"`
-	Points        int           `json:"points"`
-	Category      string        `json:"category"`
-	IsPublished   bool          `json:"isPublished"`
-	DateCreated   time.Time     `json:"dateCreated"`
-	DateUpdated   time.Time     `json:"dateUpdated"`
-	DatePublished time.Time     `json:"datePublished"`
-	Tags          []TagResponse `json:"tags"`
-	User          UserOnItem    `json:"user"`
-	Rounds        []string      `json:"rounds"`
+	ID            int          `json:"id"`
+	Title         string       `json:"title"`
+	Answer        string       `json:"answer"`
+	Points        int          `json:"points"`
+	Category      string       `json:"category"`
+	IsPublished   bool         `json:"isPublished"`
+	DateCreated   time.Time    `json:"dateCreated"`
+	DateUpdated   time.Time    `json:"dateUpdated"`
+	DatePublished time.Time    `json:"datePublished"`
+	Tags          TagsResponse `json:"tags"`
+	User          UserOnItem   `json:"user"`
+	Rounds        []string     `json:"rounds"`
 }
 
 // 'Lite' response object for queries on multiple items

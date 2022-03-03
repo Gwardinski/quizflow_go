@@ -32,13 +32,14 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create new User from RegisterPayload values
-	var user User
-	user.Username = payload.Username
-	user.Email = payload.Email
 	// TODO: Storing plain text passwords in DB is highly secure and always encouraged ✅
-	user.PasswordHash = payload.Password
-	user.DateCreated = time.Now()
-	user.DateUpdated = time.Now()
+	user := User{
+		Username:     payload.Username,
+		Email:        payload.Email,
+		PasswordHash: payload.Password,
+		DateCreated:  time.Now(),
+		DateUpdated:  time.Now(),
+	}
 
 	// Write new User to DB
 	err = app.db.RegisterUser(user)
@@ -61,7 +62,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user from DB where user.email == LoginPayload.email
-	user, e := app.db.GetUserByEmail(payload.Email)
+	user, e := app.db.GetUserForLogin(payload.Email)
 	if e != nil {
 		// User shouldn't know if email exists or not, just us
 		fmt.Println("User not found")

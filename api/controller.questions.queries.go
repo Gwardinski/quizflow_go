@@ -83,15 +83,6 @@ const TAG_FROM_QUESTION_TAG_QUERY string = `
 		qt.question_id = $1
 `
 
-const USER_SELECT_QUERY string = `
-	select
-		u.id, u.username
-	from
-		users u
-	where
-		u.id = $1
-`
-
 func GET_QUESTION_LIST_QUERY(where, order string) string {
 	query := `
 		select 
