@@ -37,7 +37,7 @@ func (app *application) getPublishedRounds(w http.ResponseWriter, r *http.Reques
 func (app *application) getRound(w http.ResponseWriter, r *http.Request) {
 	// Get UserID from JWT (to confirm ownership)
 	uidToken, err := app.getUserIdFromJWT(r)
-	if err != nil {
+	if err != nil { 
 		app.writeError(w, err, http.StatusUnauthorized)
 		return
 	}
