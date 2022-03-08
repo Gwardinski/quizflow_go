@@ -3,26 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 )
 
-func (m *DBModel) GetQuestion(id int) (QuestionDetailsRes, error) {
+// Single Question, also queries User and Tag tables
+func (m *DBModel) GetQuestion(id int) (Question, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	// GET SINGLE QUESTION
-	var question QuestionDetailsRes
+	var question Question
 	row := m.DB.QueryRowContext(ctx, QUESTION_SELECT_QUERY, id)
 	err := question.serialise(row)
-	if err != nil {
-		return question, err
-	}
-
-	// GET SINGLE USER
-	var user UserOnItem
-	row = m.DB.QueryRowContext(ctx, USER_SELECT_QUERY, question.User.ID)
-	err = user.serialise(row)
 	if err != nil {
 		return question, err
 	}
@@ -39,75 +31,71 @@ func (m *DBModel) GetQuestion(id int) (QuestionDetailsRes, error) {
 		return question, err
 	}
 
-	// SET TAGS / USER
+	// SET TAGS
 	question.Tags = tags
-	question.User = user
 
 	return question, nil
 }
 
-func (m DBModel) GetPublishedQuestions() ([]QuestionListItemRes, error) {
+// List, does not query User or Tag tables
+func (m DBModel) GetPublishedQuestions() ([]QuestionItem, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	// GET QUESTIONS
 	where := "is_published = true"
 	order := "title"
-	query := GET_QUESTION_LIST_QUERY(where, order)
+	query := QUESTION_LIST_QUERY(where, order)
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return serialiseQuestionsList(rows)
+	return serialiseQuestions(rows)
 }
 
-func (m DBModel) GetUsersQuestions(userId int) ([]QuestionListItemRes, error) {
+func (m DBModel) GetUsersQuestions(userId int) ([]QuestionItem, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	// GET QUESTIONS
 	where := "user_id = $1"
 	order := "title"
-	query := GET_QUESTION_LIST_QUERY(where, order)
+	query := QUESTION_LIST_QUERY(where, order)
 	rows, err := m.DB.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
-	return serialiseQuestionsList(rows)
+	return serialiseQuestions(rows)
 }
 
-func (m DBModel) GetQuestionsByUser(userId int) ([]QuestionListItemRes, error) {
+func (m DBModel) GetQuestionsByUser(userId int) ([]QuestionItem, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	// GET QUESTIONS
 	where := "user_id = $1 and is_published = true"
 	order := "title"
-	query := GET_QUESTION_LIST_QUERY(where, order)
+	query := QUESTION_LIST_QUERY(where, order)
 	rows, err := m.DB.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return serialiseQuestionsList(rows)
+	return serialiseQuestions(rows)
 }
 
 func (m *DBModel) CreateQuestion(question QuestionPayload, uid int) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// Convert int values from string
-	points, err := strconv.Atoi(question.Points)
-	if err != nil {
-		return 0, err
-	}
 	// Create Question
 	row := m.DB.QueryRowContext(ctx, QUESTION_INSERT_QUERY,
 		question.Title,
 		question.Answer,
-		points,
+		question.Points,
 		question.Category,
 		time.Now(),
 		time.Now(),
@@ -162,7 +150,7 @@ func updateQuestionTags(m *DBModel, ctx context.Context, tags []string, question
 	m.DB.ExecContext(ctx, QUESTION_TAG_DELETE_ALL_QUERY, questionID)
 	// TODO: error handling
 	for _, t := range tags {
-		// Find if Tag already exists
+		// Find if Tag doesn't exist
 		row := m.DB.QueryRowContext(ctx, TAG_SELECT_QUERY, t)
 		var tag Tag
 		tag.serialise(row)

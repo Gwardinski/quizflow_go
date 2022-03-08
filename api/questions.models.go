@@ -8,8 +8,8 @@ import (
 
 // Model Representation of Database Structure
 // UserID is a field on the object
-// Only the response models nest UserID under a 'User' field (see QuestionDetailsRes)
-type Question struct {
+// Only the response models nest UserID under a 'User' field (see Question)
+type QuestionDB struct {
 	ID            int       `json:"id"`
 	UserID        int       `json:"user_id"`
 	Title         string    `json:"title"`
@@ -26,13 +26,12 @@ type Question struct {
 	= = = = = = = = = = = = = = = = = =
 	REQUEST BODY
 	Used for easier decoding of recieved json on Create & Update functions.
-	Each value type as a string. (no ints)
 	= = = = = = = = = = = = = = = = = =
 */
 type QuestionPayload struct {
 	Title    string   `json:"title"`
 	Answer   string   `json:"answer"`
-	Points   string   `json:"points"`
+	Points   int      `json:"points"`
 	Category string   `json:"category"`
 	Tags     []string `json:"tags"`
 }
@@ -44,10 +43,7 @@ type QuestionPayload struct {
 	UserID is now moved into seperate 'User' field
 	= = = = = = = = = = = = = = = = = =
 */
-// 'Full' response object for queries on a specific item
-// /questions/{:id}
-// Multiple Look ups made in controller to get Tag strings and User struct from DB
-type QuestionDetailsRes struct {
+type Question struct {
 	ID            int          `json:"id"`
 	Title         string       `json:"title"`
 	Answer        string       `json:"answer"`
@@ -58,21 +54,19 @@ type QuestionDetailsRes struct {
 	DateUpdated   time.Time    `json:"dateUpdated"`
 	DatePublished time.Time    `json:"datePublished"`
 	Tags          TagsResponse `json:"tags"`
-	User          UserOnItem   `json:"user"`
+	User          UserItem     `json:"user"`
 }
-
-// 'Lite' response object for queries on multiple items
-// /questions/
-// /questions/user
-// /questions/user/{:id}
-type QuestionListItemRes struct {
-	ID          int        `json:"id"`
-	Title       string     `json:"title"`
-	Answer      string     `json:"answer"`
-	Points      int        `json:"points"`
-	Category    string     `json:"category"`
-	IsPublished bool       `json:"isPublished"`
-	User        UserOnItem `json:"user"`
+type QuestionItem struct {
+	ID          int         `json:"id"`
+	Title       string      `json:"title"`
+	Answer      string      `json:"answer"`
+	Points      int         `json:"points"`
+	Category    string      `json:"category"`
+	IsPublished bool        `json:"isPublished"`
+	User        UserSubItem `json:"user"`
+}
+type QuestionSubItem struct {
+	ID int `json:"id"`
 }
 
 /*

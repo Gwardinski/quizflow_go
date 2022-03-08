@@ -62,8 +62,9 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user from DB where user.email == LoginPayload.email
-	user, e := app.db.GetUserForLogin(payload.Email)
-	if e != nil {
+	user, err := app.db.GetUserForLogin(payload.Email)
+
+	if err != nil {
 		// User shouldn't know if email exists or not, just us
 		fmt.Println("User not found")
 		app.writeError(w, errors.New(err.Error()), http.StatusBadRequest) // non-specific error text

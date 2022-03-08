@@ -2,12 +2,26 @@ package main
 
 const QUESTION_SELECT_QUERY string = `
 	select 
-		id, title, answer, points, category, is_published, user_id, date_created, date_updated
+		q.id, q.title, q.answer, q.points, q.category, q.is_published, q.date_created, q.date_updated,
+		u.id, u.username
 	from 
-		questions
+		questions q
+		left join users u on (u.id = q.user_id)
 	where 
-		id = $1
+		q.id = $1
 `
+
+func QUESTION_LIST_QUERY(where, order string) string {
+	query := `
+		select 
+			q.id, q.title, q.answer, q.points, q.category, q.is_published, q.user_id
+		from 
+			questions q
+	`
+	query += ("where " + where + " ")
+	query += ("order by " + order)
+	return query
+}
 
 const QUESTION_INSERT_QUERY string = `
 	insert into questions 
@@ -35,7 +49,7 @@ const QUESTION_DELETE_QUERY string = `
 
 const TAG_SELECT_QUERY string = `
 	select
-		t.id, t.title
+		t.title
 	from
 		tags t
 	where
@@ -75,21 +89,10 @@ const QUESTION_TAG_DELETE_ALL_QUERY string = `
 
 const TAG_FROM_QUESTION_TAG_QUERY string = `
 	select
-		qt.id, qt.question_id, qt.tag_id, t.title
+		t.title
 	from
 		questions_tags qt
 		left join tags t on (t.id = qt.tag_id)
 	where
 		qt.question_id = $1
 `
-
-func GET_QUESTION_LIST_QUERY(where, order string) string {
-	query := `
-		select 
-			id, title, answer, points, category, is_published, user_id
-		from questions
-	`
-	query += ("where " + where + " ")
-	query += ("order by " + order)
-	return query
-}

@@ -10,15 +10,19 @@ type User struct {
 	Username     string    `json:"username"`
 	Email        string    `json:"-"`
 	PasswordHash string    `json:"-"`
+	Image        string    `json:"image"`
 	DateCreated  time.Time `json:"date_created"`
-	DateUpdated  time.Time `json:"date_updated"`
-	// Image
+	DateUpdated  time.Time `json:"-"`
 }
 
 // Simplified User object when returning Question / Round / Quiz
-type UserOnItem struct {
-	ID int `json:"id"`
-	// following will be null on lists, only retrieved when querying item by ID
+type UserItem struct {
+	ID       int    `json:"id"`
 	Username string `json:"username"`
-	// Image
+	Image    string `json:"image"`
+}
+
+// Simplified User object when returning list of Questions / Rounds / Quizs
+type UserSubItem struct {
+	ID int `json:"id"`
 }

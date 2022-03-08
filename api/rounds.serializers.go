@@ -1,19 +1,59 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
-func (q *RoundDetailsRes) serialise(row *sql.Row) (err error) {
+func (r *Round) serialise(row *sql.Row) (err error) {
 	err = row.Scan(
-		&q.ID,
-		&q.Title,
-		&q.Description,
-		&q.IsPublished,
-		&q.User.ID,
-		&q.DateCreated,
-		&q.DateUpdated,
+		&r.ID,
+		&r.Title,
+		&r.Description,
+		&r.IsPublished,
+		&r.DateCreated,
+		&r.DateUpdated,
+		&r.User.ID,
+		&r.User.Username,
 	)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func serialiseRounds(rows *sql.Rows) (q []RoundItem, err error) {
+	var rounds []RoundItem
+	for rows.Next() {
+		var r RoundItem
+		// TODO: array is returned as []byte 🤔
+		// Needs converted into string, then into []string, then into []int 🙄
+		var qidString string
+		err = rows.Scan(
+			&r.ID,
+			&r.Title,
+			&r.Description,
+			&r.IsPublished,
+			&r.DateCreated,
+			&r.DateUpdated,
+			&r.User.ID,
+			&qidString,
+		)
+		if err != nil {
+			return []RoundItem{}, err
+		}
+		r.Questions = _appendQuestionOnListItems(qidString)
+		rounds = append(rounds, r)
+	}
+	return rounds, nil
+}
+
+func _appendQuestionOnListItems(qidString string) (questions []QuestionSubItem) {
+	qids := byteStringToIntSlice(qidString)
+	for _, id := range qids {
+		q := QuestionSubItem{
+			ID: id,
+		}
+		questions = append(questions, q)
+	}
+	return questions
 }

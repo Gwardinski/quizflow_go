@@ -79,7 +79,6 @@ func (app *application) getUsersQuestions(w http.ResponseWriter, r *http.Request
 		app.writeError(w, err, http.StatusUnauthorized)
 		return
 	}
-
 	// Get Questions
 	questions, err := app.db.GetUsersQuestions(uidToken)
 	if err != nil {
