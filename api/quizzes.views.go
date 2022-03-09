@@ -16,16 +16,16 @@ import (
 	= = = = = = = = = = = = = = = = = =
 */
 
-func (app *application) getPublishedRounds(w http.ResponseWriter, r *http.Request) {
-	// Get Rounds
-	rounds, err := app.db.GetPublishedRounds()
+func (app *application) getPublishedQuizzes(w http.ResponseWriter, r *http.Request) {
+	// Get Quizzes
+	quizzes, err := app.db.GetPublishedQuizzes()
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	// Write Data
-	app.writeResponse(w, http.StatusOK, rounds)
+	app.writeResponse(w, http.StatusOK, quizzes)
 }
 
 /*
@@ -35,7 +35,7 @@ func (app *application) getPublishedRounds(w http.ResponseWriter, r *http.Reques
 	= = = = = = = = = = = = = = = = = =
 */
 
-func (app *application) getRound(w http.ResponseWriter, r *http.Request) {
+func (app *application) getQuiz(w http.ResponseWriter, r *http.Request) {
 	// Get UserID from JWT (to confirm ownership)
 	uidToken, err := app.getUserIdFromJWT(r)
 	if err != nil {
@@ -43,23 +43,23 @@ func (app *application) getRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get Round ID from params
+	// Get Quiz ID from params
 	vars := mux.Vars(r)
-	ridParam, err := strconv.Atoi(vars["id"])
+	qzidParam, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	// Get Round
-	round, err := app.db.GetRound(ridParam)
-	if err != nil || round.ID == 0 {
+	// Get Quiz
+	quiz, err := app.db.GetQuiz(qzidParam)
+	if err != nil || quiz.ID == 0 {
 		app.writeError(w, err, http.StatusNotFound)
 		return
 	}
 
-	// AUTH CHECK: Check round belongs to user (if not published)
-	if !round.IsPublished && (round.User.ID != uidToken) {
+	// AUTH CHECK: Check quiz belongs to user (if not published)
+	if !quiz.IsPublished && (quiz.User.ID != uidToken) {
 		app.writeError(
 			w,
 			errors.New("not published / No Auth"),
@@ -69,29 +69,29 @@ func (app *application) getRound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write Data
-	app.writeResponse(w, http.StatusOK, round)
+	app.writeResponse(w, http.StatusOK, quiz)
 }
 
-func (app *application) getUsersRounds(w http.ResponseWriter, r *http.Request) {
-	// Get UserID from JWT (to get users rounds)
+func (app *application) getUsersQuizzes(w http.ResponseWriter, r *http.Request) {
+	// Get UserID from JWT (to get users quizzes)
 	uidToken, err := app.getUserIdFromJWT(r)
 	if err != nil {
 		app.writeError(w, err, http.StatusUnauthorized)
 		return
 	}
 
-	// Get Rounds
-	rounds, err := app.db.GetUsersRounds(uidToken)
+	// Get Quizzes
+	quizzes, err := app.db.GetUsersQuizzes(uidToken)
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	// Write Data
-	app.writeResponse(w, http.StatusOK, rounds)
+	app.writeResponse(w, http.StatusOK, quizzes)
 }
 
-func (app *application) getRoundsByUser(w http.ResponseWriter, r *http.Request) {
+func (app *application) getQuizzesByUser(w http.ResponseWriter, r *http.Request) {
 	// Get UserID from JWT (validation check)
 	_, err := app.getUserIdFromJWT(r)
 	if err != nil {
@@ -107,39 +107,39 @@ func (app *application) getRoundsByUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Get Rounds
-	rounds, err := app.db.GetRoundsByUser(uidParams)
+	// Get Quizzes
+	quizzes, err := app.db.GetQuizzesByUser(uidParams)
 	if err != nil {
 		app.writeError(w, err, http.StatusNotFound)
 		return
 	}
 
 	// Write Data
-	app.writeResponse(w, http.StatusOK, rounds)
+	app.writeResponse(w, http.StatusOK, quizzes)
 }
 
-// func (app *application) getRoundsQuizzes(w http.ResponseWriter, r *http.Request) {
+// func (app *application) getQuizzesQuizzes(w http.ResponseWriter, r *http.Request) {
 
 // }
 
-func (app *application) createRound(w http.ResponseWriter, r *http.Request) {
-	// Get UserID from JWT (to set as UserID on new Round)
+func (app *application) createQuiz(w http.ResponseWriter, r *http.Request) {
+	// Get UserID from JWT (to set as UserID on new Quiz)
 	uidToken, err := app.getUserIdFromJWT(r)
 	if err != nil {
 		app.writeError(w, err, http.StatusUnauthorized)
 		return
 	}
 
-	// Decode request body into RoundPayload
-	var payload RoundPayload
+	// Decode request body into QuizPayload
+	var payload QuizPayload
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	// Write new Round to DB, return it's ID
-	rid, err := app.db.CreateRound(payload, uidToken)
+	// Write new Quiz to DB, return it's ID
+	rid, err := app.db.CreateQuiz(payload, uidToken)
 	if err != nil {
 		app.writeError(w, err, http.StatusBadRequest)
 		return

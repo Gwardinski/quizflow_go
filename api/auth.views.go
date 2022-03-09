@@ -33,7 +33,7 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 
 	// Create new User from RegisterPayload values
 	// TODO: Storing plain text passwords in DB is highly secure and always encouraged ✅
-	user := User{
+	user := UserDB{
 		Username:     payload.Username,
 		Email:        payload.Email,
 		PasswordHash: payload.Password,

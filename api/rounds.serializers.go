@@ -21,8 +21,7 @@ func (r *Round) serialise(row *sql.Row) (err error) {
 	return nil
 }
 
-func serialiseRounds(rows *sql.Rows) (q []RoundItem, err error) {
-	var rounds []RoundItem
+func serialiseRounds(rows *sql.Rows) (rounds []RoundItem, err error) {
 	for rows.Next() {
 		var r RoundItem
 		// TODO: array is returned as []byte 🤔

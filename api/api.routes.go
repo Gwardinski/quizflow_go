@@ -38,10 +38,17 @@ func (app *application) routes() http.Handler {
 	roundsRoute.HandleFunc("/", app.createRound).Methods("POST")
 	// roundsRoute.HandleFunc("/{id}", app.updateRound).Methods("PUT")
 	// roundsRoute.HandleFunc("/{id}", app.deleteRound).Methods("DELETE")
-	roundsRoute.HandleFunc("/{id}/quizzes", app.getRoundsQuizzes).Methods("GET")
+	// roundsRoute.HandleFunc("/{id}/quizzes", app.getRoundsQuizzes).Methods("GET")
 
-	// TODO: Quiz routes
-
+	// Quiz routes
+	quizzesRoute := router.PathPrefix("/quizzes").Subrouter()
+	quizzesRoute.HandleFunc("/", app.getPublishedQuizzes).Methods("GET")
+	quizzesRoute.HandleFunc("/user", app.getUsersQuizzes).Methods("GET")
+	quizzesRoute.HandleFunc("/user/{id}", app.getQuizzesByUser).Methods("GET")
+	quizzesRoute.HandleFunc("/{id}", app.getQuiz).Methods("GET")
+	quizzesRoute.HandleFunc("/", app.createQuiz).Methods("POST")
+	// quizzesRoute.HandleFunc("/{id}", app.updateQuiz).Methods("PUT")
+	// quizzesRoute.HandleFunc("/{id}", app.deleteQuiz).Methods("DELETE")
 	// Handle CORS Middleware
 	return app.enableCORS(router)
 }

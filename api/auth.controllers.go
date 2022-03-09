@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (m *DBModel) RegisterUser(user User) error {
+func (m *DBModel) RegisterUser(user UserDB) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -23,13 +23,13 @@ func (m *DBModel) RegisterUser(user User) error {
 	return nil
 }
 
-func (m *DBModel) GetUserForLogin(email string) (*User, error) {
+func (m *DBModel) GetUserForLogin(email string) (*UserDB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, USER_LOGIN_QUERY, email)
 
-	var user User
+	var user UserDB
 	err := row.Scan(
 		&user.ID,
 		&user.Email,

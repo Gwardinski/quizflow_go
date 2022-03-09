@@ -5,7 +5,7 @@ import "time"
 // Model Representation of Database Structure
 // Full object only returned on request to view profile information
 // Simplified represenations used on item requests
-type User struct {
+type UserDB struct {
 	ID           int       `json:"id"`
 	Username     string    `json:"username"`
 	Email        string    `json:"-"`
@@ -15,14 +15,20 @@ type User struct {
 	DateUpdated  time.Time `json:"-"`
 }
 
-// Simplified User object when returning Question / Round / Quiz
+// UserItem is returned when requesting single parent item
+// GET - /quizzes/{ID}
+// GET - /rounds/{ID}
+// GET - /questions/{ID}
 type UserItem struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Image    string `json:"image"`
 }
 
-// Simplified User object when returning list of Questions / Rounds / Quizs
+// UserSubItem is returned when requesting multiple parent items
+// GET - /quizzes/
+// GET - /rounds/
+// GET - /questions/
 type UserSubItem struct {
 	ID int `json:"id"`
 }

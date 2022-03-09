@@ -43,6 +43,9 @@ type QuestionPayload struct {
 	UserID is now moved into seperate 'User' field
 	= = = = = = = = = = = = = = = = = =
 */
+
+// Question is returned when requesting single item
+// GET - /questions/{ID}
 type Question struct {
 	ID            int          `json:"id"`
 	Title         string       `json:"title"`
@@ -56,6 +59,12 @@ type Question struct {
 	Tags          TagsResponse `json:"tags"`
 	User          UserItem     `json:"user"`
 }
+
+// QuestionItem is returned when requesting multiple items
+// GET - /questions/
+// GET - /questions/user
+// Or when requesting a single parent item
+// GET - /rounds/{ID}
 type QuestionItem struct {
 	ID          int         `json:"id"`
 	Title       string      `json:"title"`
@@ -65,6 +74,10 @@ type QuestionItem struct {
 	IsPublished bool        `json:"isPublished"`
 	User        UserSubItem `json:"user"`
 }
+
+// QuestionSubItem is returned when requesting multiple parent items
+// GET - /rounds/
+// GET - /rounds/user/
 type QuestionSubItem struct {
 	ID int `json:"id"`
 }

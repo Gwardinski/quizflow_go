@@ -4,12 +4,10 @@ import (
 	"time"
 )
 
-// TODO: Add 'Image' field to all structs
-
 // Model Representation of Database Structure
 // UserID is a field on the object
-// Only the response models nest UserID under a 'User' field (see Round)
-type RoundDB struct {
+// Only the response models nest UserID under a 'User' field (see Quiz)
+type QuizDB struct {
 	ID            int       `json:"id"`
 	UserID        int       `json:"user_id"`
 	Title         string    `json:"title"`
@@ -27,10 +25,10 @@ type RoundDB struct {
 	Each value type as a string. (no ints)
 	= = = = = = = = = = = = = = = = = =
 */
-type RoundPayload struct {
+type QuizPayload struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
-	QIDs        []string `json:"qids"`
+	RIDs        []string `json:"rids"`
 }
 
 /*
@@ -41,9 +39,25 @@ type RoundPayload struct {
 	= = = = = = = = = = = = = = = = = =
 */
 
-// Round is returned when requesting single item
-// GET - /rounds/{ID}
-type Round struct {
+// Quiz is returned when requesting single item
+// GET - /quizzes/{ID}
+type Quiz struct {
+	ID            int         `json:"id"`
+	Title         string      `json:"title"`
+	Description   string      `json:"description"`
+	TotalPoints   int         `json:"total_points"`
+	IsPublished   bool        `json:"isPublished"`
+	DateCreated   time.Time   `json:"dateCreated"`
+	DateUpdated   time.Time   `json:"dateUpdated"`
+	DatePublished time.Time   `json:"datePublished"`
+	User          UserItem    `json:"user"`
+	Rounds        []RoundItem `json:"rounds"`
+}
+
+// QuizItem is returned when requesting multiple items
+// GET - /quizzes/
+// GET - /quizzes/user
+type QuizItem struct {
 	ID            int            `json:"id"`
 	Title         string         `json:"title"`
 	Description   string         `json:"description"`
@@ -52,31 +66,6 @@ type Round struct {
 	DateCreated   time.Time      `json:"dateCreated"`
 	DateUpdated   time.Time      `json:"dateUpdated"`
 	DatePublished time.Time      `json:"datePublished"`
-	User          UserItem       `json:"user"`
-	Questions     []QuestionItem `json:"questions"`
-}
-
-// RoundItem is returned when requesting multiple items
-// GET - /rounds/
-// GET - /rounds/user
-// Or when requesting a single parent item
-// GET - /quizzes/{ID}
-type RoundItem struct {
-	ID            int               `json:"id"`
-	Title         string            `json:"title"`
-	Description   string            `json:"description"`
-	TotalPoints   int               `json:"total_points"`
-	IsPublished   bool              `json:"isPublished"`
-	DateCreated   time.Time         `json:"dateCreated"`
-	DateUpdated   time.Time         `json:"dateUpdated"`
-	DatePublished time.Time         `json:"datePublished"`
-	User          UserSubItem       `json:"user"`
-	Questions     []QuestionSubItem `json:"questions"`
-}
-
-// RoundSubItem is returned when requesting multiple parent items
-// GET - /quizzes/
-// GET - /quizzes/user
-type RoundSubItem struct {
-	ID int `json:"id"`
+	User          UserSubItem    `json:"user"`
+	Rounds        []RoundSubItem `json:"rounds"`
 }
